@@ -1,0 +1,6 @@
+service - tudo o que for regra de negócio ou processamento
+controller - intermediar o Model e o View
+routes - camadas de apresentação
+server - responsável por criar o servidor mas não criando a instância
+index - instância do servidor
+config - tudo o que for estático do projeto

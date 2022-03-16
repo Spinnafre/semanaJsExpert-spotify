@@ -1,0 +1,13 @@
+Pegar informações do módulo como a URL em que ele está inserido
+import.meta //Irá trazer informações do contexto do modulo {url: 'file:///C:/Users/davis/Documents/PROJECTS/Js/jsExpert/semanajsexpert-spotify-template/server/config.js'}
+
+fileURLToPath irá converter essa url do meta para uma string do path absoluto
+fileURLToPath('file:///C:/path/');         // Correct:   C:\path\ (Windows)
+
+__dirname is an environment variable that tells you the absolute path of the directory containing the currently executing file.
+ex: 
+    - caminho do arquivo (filename): C:\Users\davis\Documents\PROJECTS\Js\jsExpert\semanajsexpert-spotify-template\server\config.js
+    - caminho absoluto do arquivo (dirname): C:\Users\davis\Documents\PROJECTS\Js\jsExpert\semanajsexpert-spotify-template\server
+
+join é usado para juntar paths:
+    - C:\Users\davis\Documents\PROJECTS\Js\jsExpert\semanajsexpert-spotify-template\server + '../' =>C:\Users\davis\Documents\PROJECTS\Js\jsExpert\semanajsexpert-spotify-template
