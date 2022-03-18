@@ -6,6 +6,7 @@ const rootDir=join(currentDir,'../')
 const audioDir=join(rootDir,'audio')
 const publicDir=join(rootDir,'public')
 
+//ARQUIVOS ESTÁTICOS
 export default{
     port: process.env.PORT || 3000,
     dirs:{
@@ -16,11 +17,17 @@ export default{
         fxDir:join(audioDir,'fx')
     },
     pages:{
-        home:'home/index.html',
-        controller:'controller/index.html'
+        homeHTML:'home/index.html',
+        controllerHTML:'controller/index.html'
     },
     location:{
         home:'/home'
     },
-    constants:{}
+    constants:{
+        CONTENT_TYPE:{
+            '.html':'text/html',
+            '.css':'text/css',
+            '.js':'text/javascript',
+        }
+    }
 }

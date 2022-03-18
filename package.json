@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node server/index.js",
     "live-server": "nodemon server/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "engines": {
     "node": "16"
@@ -24,6 +24,11 @@
   },
   "homepage": "https://github.com/ErickWendel/semanajsexpert-spotify-template#readme",
   "devDependencies": {
+    "jest": "^27.5.1",
     "nodemon": "^2.0.15"
+  },
+  "dependencies": {
+    "pino": "^7.8.1",
+    "pino-pretty": "^7.5.3"
   }
 }

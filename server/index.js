@@ -1,6 +1,8 @@
+import config from './config.js'
 import server from './server.js'
+import { logger } from './util.js'
 
-server.listen(3333)
+server.listen(config.port)
 .on('listening',()=>{
-    console.log('running in http://localhost:3333')
+    logger.info(`running in http://localhost:${config.port}`)
 })
