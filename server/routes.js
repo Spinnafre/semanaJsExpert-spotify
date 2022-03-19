@@ -4,7 +4,9 @@ import config from './config.js'
 
 
 const {
-    location,
+    location:{
+        home
+    },
     pages: {
         homeHTML,
         controllerHTML
@@ -21,7 +23,7 @@ async function routes(req, res) {
     //http://localhost:3000/ irá redirecionar para http://localhost:3000/home
     if (method === 'GET' && url === '/') {
         res.writeHead(302, {
-            'Location': location.home
+            'Location': home
         })
         return res.end()
     }
@@ -67,7 +69,7 @@ async function routes(req, res) {
 function handleErrors(err, response) {
     //Arquivo ou caminho não encontrado
     //Irá exibir o erro mas não irá parar a aplicação
-    if (err.message.included('ENOENT')) {
+    if (err.message.includes('ENOENT')) {
         logger.warn(`Asset not found ${err.stack}`)
         response.writeHead(404) // STATUS 404
         return response.end()
