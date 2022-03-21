@@ -11,3 +11,7 @@ ex:
 
 join é usado para juntar paths:
     - C:\Users\davis\Documents\PROJECTS\Js\jsExpert\semanajsexpert-spotify-template\server + '../' =>C:\Users\davis\Documents\PROJECTS\Js\jsExpert\semanajsexpert-spotify-template
+
+Devido a problemas no windows em definir variáveis ambientes, usei o SET para trabalhar com elas, mas no docker o SET não é reconhecido então criei uma versão sem o SET
+    "test:windows": "SET NODE_OPTIONS=--experimental-vm-modules && npx jest",
+    "test": "LOG_DISABLED=true NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest --no-cache",

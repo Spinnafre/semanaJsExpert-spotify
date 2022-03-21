@@ -1,0 +1,58 @@
+version: '2.1'
+services: 
+  # service(container) 
+  live-reload:
+    image: spotify-radio
+    build: .
+    environment:
+      PORT: 3000
+    command: 
+      - npm
+      - run
+      - live-reload
+    volumes:
+    # Pega arquivos do root do local e joga dentro do /spotify-radio
+      - .:/spotify-radio
+      - node_modules:/spotify-radio/node_modules
+    ports:
+    # Acessando 3000 localmente irá acesssar 3000 do container
+      - 3000:3000
+
+  test:
+    image: spotify-radio
+    build: .
+    command: 
+      - npm
+      - run
+      - test
+    volumes:
+      - .:/spotify-radio
+      - node_modules:/spotify-radio/node_modules
+
+  test-watch:
+    image: spotify-radio
+    build: .
+    command: 
+      - npm
+      - run
+      - test:watch
+    # Os arquivos que estão no local irá ficar salvos no container e caso o container
+    # seja excluído, irá ficar salvos como backups. 
+    volumes:
+      - .:/spotify-radio
+      - node_modules:/spotify-radio/node_modules
+
+  test-coverage:
+    image: spotify-radio
+    build: .
+    command: 
+      - npm
+      - run
+      - test:coverage
+    volumes:
+      - .:/spotify-radio
+      - node_modules:/spotify-radio/node_modules
+
+volumes:
+  node_modules: {}
+    
