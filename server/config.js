@@ -1,11 +1,14 @@
 import { join, dirname } from 'path'
 import { fileURLToPath } from 'url'
-//{url: 'file:///C:/Users/davis/Documents/PROJECTS/Js/jsExpert/semanajsexpert-spotify-template/server/config.js'}
-const currentDir = dirname(fileURLToPath(import.meta.url))
+//FileURL=> {url: 'file:///C:/Users/davis/Documents/PROJECTS/Js/jsExpert/semanajsexpert-spotify-template/server/config.js'}
+//Irá ser convertida para C:/Users/davis/Documents/PROJECTS/Js/jsExpert/semanajsexpert-spotify-template/server/config.js
+// Como estou trabalhando com módulos (type:modules), usar o __dirname e __filename não irá funcionar
+// para isso é só pegar o meta a url e ler a url do arquivo.
+const currentDir = dirname(fileURLToPath(import.meta.url)) //x/x/server/
 const rootDir = join(currentDir, '../')
 const audioDir = join(rootDir, 'audio')
 const publicDir = join(rootDir, 'public')
-const songsDirectory = join(audioDirectory, 'songs')
+const songsDir = join(audioDir, 'songs')
 //ARQUIVOS ESTÁTICOS
 export default {
     port: process.env.PORT || 3000,
@@ -33,6 +36,6 @@ export default {
         songVolume: '0.99',
         fallbackBitRate: '128000',
         bitRateDivisor: 8,
-        englishConversation: join(songsDirectory, 'conversation.mp3')
+        englishConversation: join(songsDir, 'conversation.mp3')
     }
 }

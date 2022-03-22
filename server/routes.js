@@ -4,14 +4,14 @@ import config from './config.js'
 
 
 const {
-    location:{
+    location: {
         home
     },
     pages: {
         homeHTML,
         controllerHTML
     },
-    constants:{
+    constants: {
         CONTENT_TYPE
     }
 } = config
@@ -26,6 +26,23 @@ async function routes(req, res) {
             'Location': home
         })
         return res.end()
+    }
+    if (method === 'GET' && url === '/stream') {
+        const {
+            stream,
+            onCloseConnection
+        } = controller.createClientStream()
+        //Se for mandado algum evento 'close'  na requisição
+        //Irá entender que terá que excluir o cliente
+        req.once("close", onCloseConnection) 
+        //Informar o tipo de header da response para aceitar
+        // audio e em fluxos de bytes
+        res.writeHead(200, {
+            'Content-Type': 'audio/mpeg',
+            'Accept-Rages': 'bytes'
+        })
+
+        return stream.pipe(res)
     }
     if (method === 'GET' && url === '/home') {
         const {
@@ -51,12 +68,12 @@ async function routes(req, res) {
         const {
             readableStream,
             type
-        }=await controller.getFileStream(url)
+        } = await controller.getFileStream(url)
         //Irá procurar se o tipo de arquivo está no CONTENT_TYPE
-        const contentType=CONTENT_TYPE[type]
-        if(contentType){
-            res.writeHead(200,{
-                'Content-Type':contentType
+        const contentType = CONTENT_TYPE[type]
+        if (contentType) {
+            res.writeHead(200, {
+                'Content-Type': contentType
             })
         }
         return readableStream.pipe(res)
