@@ -51,8 +51,8 @@
           <i class="fas fa-chevron-right container__section__arrow hide"></i>
         </div>
         <div class="container__section__user">
-          <img src="./home/assets/user-eg.jpg" alt="user" />
-          Erick Wendel
+          <!-- <img src="./home/assets/user-eg.jpg" alt="user" /> -->
+          Davi Silva
         </div>
       </div>
 
@@ -173,6 +173,13 @@
     <p>Listening on Erick Wendel</p>
   </div>
   <script src="./home/js/animation.js"></script>
+  <script>
+    //  bypass prevent cache
+    window.onload = () => {
+      //document.getElementById('audio').src = '/stream?id=' + Date.now()
+      document.getElementById('audio').src = '/stream'
+    }
+  </script>
 </body>
 
 </html>

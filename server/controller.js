@@ -29,6 +29,11 @@ export class Controller{
             this.service.stopStreaming()
             return resp
         }
+
+        const fxFilePath=await this.service.readFxByName(cmd)
+        logger.info(`added fx to service:${fxFilePath}`)
+        this.service.appendFxStream(fxFilePath)
+        return resp
     }
     //Criar o id do cliente e também a stream que irá receber os áudios
     createClientStream(){

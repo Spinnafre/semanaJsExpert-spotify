@@ -2,8 +2,9 @@ function $(id) {
   return document.getElementById(id);
 }
 
-const media = document.getElementById("audio");
+let media = document.getElementById("audio");
 
+console.log('media ',media)
 const ui = {
   play: "playAudio",
   audio: "audio",

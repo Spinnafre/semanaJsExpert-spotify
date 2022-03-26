@@ -1,6 +1,7 @@
 import { logger } from "./util.js"
 import { Controller } from './controller.js'
 import config from './config.js'
+import { once } from "events"
 
 
 const {
@@ -58,9 +59,18 @@ async function routes(req, res) {
         //essa requisição
         return readableStream.pipe(res)
     }
+
     if (method === 'GET' && url === '/controller') {
         const { readableStream } = await controller.getFileStream(controllerHTML)
         return readableStream.pipe(res)
+    }
+    //Enviar comandos
+    if (method === 'POST' && url === '/controller') {
+        //Vai esperar ouvir o evento data de request
+        const data=await once(req,'data')
+        const item=JSON.parse(data)
+        const result= await controller.handleCommand(item)
+        return res.end(JSON.stringify(result))
     }
 
     //Buscar algum arquivo do servidor (http://localhost:3000/file)

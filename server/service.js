@@ -17,12 +17,16 @@ import { logger } from './util.js'
 
 const {
     dirs: {
-        publicDir
+        publicDir,
+        fxDir
     },
     constants: {
         fallbackBitRate,
         englishConversation,
-        bitRateDivisor
+        bitRateDivisor,
+        fxVolume,
+        audioMediaType,
+        songVolume
     }
 } = config
 export class Service {
@@ -53,6 +57,7 @@ export class Service {
     }
 
     async getBitRate(song) {
+        console.log('song => ', song)
         try {
             const args = [
                 '--i',// info
@@ -67,10 +72,14 @@ export class Service {
                 stdout // myProcess.stdout.on('data',...)
             } = this._executeSoxCommand(args)
 
+
             // stderr.once('readable',()=>)
             // stdout.once('readable',()=>)
             //Vai esperar primeiro ouvir pelo menos uma vez o evento 'readable' de cada stream
-            await Promise.all(once(stderr, 'readable'), once(stdout, 'readable'))
+            await Promise.all([
+                once(stderr, 'readable'),
+                once(stdout, 'readable'),
+            ])
 
             // Uma vez que esperou ler os eventos de readable (once(stream,'readable')), 
             // irá pegar os dados deles
@@ -88,12 +97,12 @@ export class Service {
         }
     }
 
-    broadcast(){
+    broadcast() {
         return new Writable({
-            write:(chunk,enc,cb)=>{
-                for(const [id,stream] of this.clientStreams){
+            write: (chunk, enc, cb) => {
+                for (const [id, stream] of this.clientStreams) {
                     //Se o client desconectou então não deve ser enviado dados para ele
-                    if(stream.writableEnded){
+                    if (stream.writableEnded) {
                         this.clientStreams.delete(id)
                         continue
                     }
@@ -117,13 +126,97 @@ export class Service {
             this.broadcast() // Mandar para os clientes a cada chunk
         )
     }
-
-    stopStreaming(){
-        if(this.throttleTransform){
-            if(this.throttleTransform.end){
+    stopStreaming() {
+        if (this.throttleTransform) {
+            if (this.throttleTransform.end) {
+                //Para de transformar a readable stream
+                // em writable stream, ou seja, irá parar a transmissão.
                 this.throttleTransform.end()
             }
         }
+    }
+
+    async readFxByName(fxName) {
+        const allSongs = await fsPromises.readdir(fxDir)
+        //Se o oome do efeito está presente no diretório de fx
+        const chooseFile = allSongs.find(filename => filename.toLowerCase().includes(fxName))
+        if (!chooseFile) {
+            return Promise.reject(`the song ${fxName} wasn't found!`)
+        }
+        return join(fxDir, chooseFile)
+    }
+    appendFxStream(fxFilePath) {
+        const throttleTransformable = new Throttle(this.currentBitRate)
+
+        //Vai adicionar um transform vazia, mas quando for recebendo dados
+        // irá passar para os clientes 
+        streamsPromises
+            .pipeline(
+                throttleTransformable,
+                this.broadcast()
+            )
+
+        const unpipe = () => {
+            const streamWithFx = this.mergeAudioStreams(fxFilePath, this.currentReadable)
+            this.throttleTransform = throttleTransformable
+            this.currentReadable = streamWithFx
+
+            //Remover o listener para evitar vazamento de memória
+            this.throttleTransform.removeListener('unpipe', unpipe)
+
+            //A media em que for lendo a stream com novo áudio com fx
+            // vai passando para a 'throttleTransformable' e em seguida irá
+            // cair no primeiro pipeline passando assim para o this.broadcast()
+            streamsPromises
+                .pipeline(
+                    streamWithFx,
+                    throttleTransformable
+                )
+        }
+
+        //Irá pausar o controle de fluxo de dados
+        this.throttleTransform.pause()
+        //Fica observando se o 'throttleTransform' foi removido da stream
+        this.throttleTransform.on('unpipe', unpipe)
+        //Remove o 'throttleTransform' de 'currentReadable'
+        this.currentReadable.unpipe(this.throttleTransform)
+    }
+    mergeAudioStreams(fxFilePath, readable) {
+        //Passar input de dados diretamente para o output 
+        const transformStream = PassThrough()
+
+        const soxCommand = [
+            '-t', audioMediaType, //Tipo de áudio passado pelo stdin (entrada)
+            '-v', songVolume, // Volume do áudio passado pelo stdin (entrada)
+            '-m', '-',//'-m' => merge, '-' => receber como stdin
+            '-t', audioMediaType, //Tipo de audio do segundo arquivo
+            '-v', fxVolume, // Volume do segundo arquivo
+            fxFilePath,
+            '-t', audioMediaType, //Tipo de áudio da saída (stdout)
+            '-' //Saída em formato stream (stdout)
+        ]
+
+        const { stdin, stdout } = this._executeSoxCommand(soxCommand)
+
+        //Passa dados da 'readable' como entrada para o 'stdin'
+        // que irá ser a entrada para o comando do terminal, fazendo assim
+        // com que o sox leia a stream com entrada e misture com o fx
+        streamsPromises
+            .pipeline(
+                readable,
+                stdin
+            )
+
+        //Pega a saída do sox command (stream) e manda para 
+        // o transform
+        streamsPromises
+            .pipeline(
+                stdout,
+                transformStream
+            )
+
+        return transformStream
+
     }
 
     //criar o READABLE stream
